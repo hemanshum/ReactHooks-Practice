@@ -4,6 +4,7 @@ import postItAPI from "../api/postIt";
 const useFetchPosts = ({ limit }) => {
   const [posts, setPosts] = useState([]);
   const [postError, setPostError] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const fetchPosts = useCallback(async () => {
     try {
@@ -22,11 +23,21 @@ const useFetchPosts = ({ limit }) => {
     fetchPosts();
   }, [fetchPosts]);
 
-  const updatePosts = useCallback((response) => {
-    setPosts((oldPosts) => [response, ...oldPosts]);
-  }, []);
+  const submitPost = async (postData) => {
+    let data = postData;
+    try {
+      setIsLoading(true);
+      const response = await postItAPI.post("/classes/PostIt", data);
+      let postObjId = response.data.objectId;
+      const newPost = await postItAPI.get(`/classes/PostIt/${postObjId}`);
+      setPosts((oldPosts) => [newPost.data, ...oldPosts]);
+      setIsLoading(false);
+    } catch (err) {
+      setPostError(err.response.data.error);
+    }
+  };
 
-  return [posts, postError, updatePosts];
+  return { posts, postError, submitPost, isLoading };
 };
 
 export default useFetchPosts;

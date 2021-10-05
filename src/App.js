@@ -1,30 +1,21 @@
-import { useEffect } from "react";
-
 import "./App.css";
 import PostForm from "./components/PostForm";
 import PostCard from "./components/PostCard";
 
 import useFetchPosts from "./hooks/useFetchPosts";
-import useSubmitPost from "./hooks/useSubmitPost";
 
 const App = () => {
-  const [posts, postError, updatePosts] = useFetchPosts({ limit: 100 });
-  const [submitPost, post, error, setPost] = useSubmitPost();
-
-  useEffect(() => {
-    if (post) {
-      updatePosts(post);
-      setPost(null);
-    }
-  }, [post, updatePosts, setPost]);
+  const { posts, postError, submitPost, isLoading } = useFetchPosts({
+    limit: 100,
+  });
 
   return (
     <>
       <PostForm submitPost={submitPost} />
-      {error && <h2>Error submiting post: {error}</h2>}
       {postError && <h2>Error fetching msg: {postError}</h2>}
+      {isLoading && <h3 className="loading-center">Loading new post....</h3>}
       {posts.length <= 0 ? (
-        <p>Loading....</p>
+        <h3 className="loading-center">Loading....</h3>
       ) : (
         posts.map((post) => (
           <PostCard
